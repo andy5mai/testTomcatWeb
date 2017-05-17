@@ -76,9 +76,9 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
     var fileAndPath;
     var result = [splitResult.length];
     for(var i = 0; i <splitResult.length; i++) {
-      fileAndPath = splitResult[i].trim().split('.java');
-      if (fileAndPath.length != 2) {
-        console.log("fileAndPath error! fileAndPath is " + fileAndPath);
+      fileAndPath = getFileAndPath(splitResult[i].trim());
+      if (fileAndPath == false) {
+        console.log("fileAndPath error! fileAndPath is " + splitResult[i]);
         continue;
       }
       
@@ -90,6 +90,27 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
   }
   
 });
+
+var fileTypes = ['.java', '.xml', '.sh', '.sql'];
+
+function getFileAndPathByFileType(fileAndPath, fileType) {
+  fileAndPath = fileAndPath.split(fileType);
+  if (fileAndPath.length != 2) return false;
+  
+  return fileAndPath;
+}
+
+function getFileAndPath(fileAndPath) {
+  var result = false;
+  for(var i = 0; i < fileTypes; i++) {
+    result = getFileAndPathByFileType(fileAndPath, fileTypes[i]);
+    if (result == false) continue;
+    
+    break;
+  }
+  
+  return result;
+}
 
 </script>
 

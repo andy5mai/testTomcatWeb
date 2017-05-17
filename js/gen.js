@@ -105,7 +105,7 @@ class gen {
 						}
 		}
 					  
-		this.includeElement(0, funcObj);
+		this.includeElement(text, funcObj);
 		
 		return this;
 	}
