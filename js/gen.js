@@ -76,6 +76,28 @@ class gen {
 	}
 	*/
 	
+	genLink(spanText, text, id, href, type, className) {
+    
+    var funcObj = { id : id,
+            href : href,
+            type : type,
+            className : className,
+            exec : function(container) {
+              var input = angular.element('<a></a>');
+              input.attr("id", this.id);
+              input.attr("href", this.href);
+              input.text(text);
+              if (this.className != null) input.attr("class", this.className);
+              if (this.type != null) input.attr(this.type, true);
+              
+              container.append(input);
+            }};
+    
+    this.includeElement(spanText, funcObj);
+    
+    return this;
+  }
+	
 	genSelect(text, id, options, values, defaultValue, type, className) {
 		
 		var funcObj = { id : id,
