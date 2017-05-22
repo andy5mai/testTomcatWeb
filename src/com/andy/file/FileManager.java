@@ -41,6 +41,22 @@ public class FileManager {
     this.commonWeight = 0;
     this.commonFile = null;
   }
+  
+  public void getDirFilesByModifiedTimeRange(File fileDir, long startTime, long endTime, List<File> filesResult) {
+   
+    File[] files = fileDir.listFiles();
+
+    if (files == null || files.length == 0) {
+      return;
+    }
+
+    for (File file : files) {
+      if ((startTime == 0 && endTime == 0)
+          || (file.lastModified() >= startTime && file.lastModified() <= endTime)) {
+        filesResult.add(file);
+      }
+    }
+  }
 
   public void searchDirFilesByModifiedTimeRange(File fileDir, long startTime, long endTime, List<File> filesResult) {
 
@@ -57,7 +73,8 @@ public class FileManager {
     for (File file : files) {
       if (file.isDirectory()) {
         this.searchDirFilesByModifiedTimeRange(file, startTime, endTime, filesResult);
-      } else if (file.lastModified() >= startTime && file.lastModified() <= endTime) {
+      } else if ((startTime == 0 && endTime == 0)
+          || (file.lastModified() >= startTime && file.lastModified() <= endTime)) {
         filesResult.add(file);
       }
     }

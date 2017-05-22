@@ -97,6 +97,50 @@ class gen {
     
     return this;
   }
+  
+	genCheckBox(text, id, options, values, defaultValues, type, className) {
+		
+		var funcObj = { id : id,
+			options : options,
+			values : values,
+			defaultValues: defaultValues,
+			type : type,
+			className : className,
+			exec : function(container) {
+				var checkboxElements = [options.length];
+				var labels = [options.length];
+				
+				for(var i = 0; i < options.length; i++) {
+					checkboxElements[i] = angular.element('<input type="checkbox" />');
+					checkboxElements[i].attr("id", this.id);
+					checkboxElements[i].attr("name", this.id);
+					checkboxElements[i].text(options[i]);
+					checkboxElements[i].attr("value", this.values[i]);
+					labels[i] = angular.element('<label></label>');
+					labels[i].text(options[i]);
+					if (this.className != null)checkboxElements[i].attr("class", this.className);
+					if (this.type != null)checkboxElements[i].attr(this.type, true);
+				
+					for(var j = 0; j < defaultValues.length; j++) {
+						if (this.values[i] === defaultValues[j]) {
+							checkboxElements[i].attr("checked", "");
+							break;
+						}
+					}
+				}
+				
+				
+				for(var k = 0; k < options.length; k++) {
+					container.append(checkboxElements[k]);
+					container.append(labels[k]);
+				}
+				//angular.element('#cb1').next('label').text()
+			}
+		}
+						  
+		this.includeElement(text, funcObj);
+		return this;
+	}
 	
 	genSelect(text, id, options, values, defaultValue, type, className) {
 		
@@ -132,7 +176,7 @@ class gen {
 		return this;
 	}
 	
-	genPostBtn(text, id, value, clickFunc) {
+	genClickBtn(text, id, value, clickFunc) {
 		var btn = angular.element('<button ng-click="' + clickFunc + '">' + value + '</button>');
 		this.container.append(btn);
 		return this;

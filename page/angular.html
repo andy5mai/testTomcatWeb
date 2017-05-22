@@ -1,9 +1,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<script type="text/javascript" src="js/jquery-3.2.0.min.js"></script>
-<script type="text/javascript" src="js/angular.min.js"></script>
-<script type="text/javascript" src="js/gen.js"></script>
+<script type="text/javascript" src="../js/jquery-3.2.0.min.js"></script>
+<script type="text/javascript" src="../js/angular.min.js"></script>
+<script type="text/javascript" src="../js/gen.js"></script>
 <style>
     div.step {
         border-style: solid;
@@ -47,6 +47,18 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
         var paramElement;
         for(var index in paramsElement) {
             paramElement = paramsElement[index];
+			if (sendParams[paramElement.id] != null) {
+              if (sendParams[paramElement.id].constructor !== Array) {
+                var multiValues = [];
+				multiValues[0] = sendParams[paramElement.id];
+				multiValues[1] = paramElement.value;
+				sendParams[paramElement.id] = multiValues;
+				continue;
+              } else {
+                sendParams[paramElement.id][sendParams[paramElement.id].length + 1] =  paramElement.value;
+				continue;
+              }
+            }
             sendParams[paramElement.id] = paramElement.value;
         }
         
@@ -81,15 +93,16 @@ var stepCount = 0;
 
 var root = angular.element('#root');
 stepCount++;
-/*
+
 var genElement = new gen(root, stepCount, 'step')
                  .genText('test input : ', 'test' + stepCount, '456', gen.type.isParam, null)
-                 .genSelect('pick one : ', 'select' + stepCount, ["1", "2", "3"], ["4", "5", "6"], true);
-
+                 .genSelect('pick one : ', 'select' + stepCount, ["1", "2", "3"], ["4", "5", "6"], true)
+                 .genCheckBox('checkbox', 'cb' + stepCount, ["cb1", "cb2", "cb3"], ["cbv1", "cbv2", "cbv3"], ["cbv1"], gen.type.isParam, null);
+/*
 stepCount++;
 var genElement = new gen(root, stepCount, 'step')
                  .genSelect('pick one : ', 'select' + stepCount, ["7", "8", "9"], ["10", "11", "12"], true)
-                 .genText('test input : ', 'test' + stepCount, '456', gen.type.isParam, null).genPostBtn(null, 'btn' + stepCount, "Send", "ajaxSend($event)");
+                 .genText('test input : ', 'test' + stepCount, '456', gen.type.isParam, null).getClickBtn(null, 'btn' + stepCount, "Send", "ajaxSend($event)");
 */
 
 

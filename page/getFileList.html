@@ -1,37 +1,37 @@
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="./js/jquery-3.2.0.min.js"></script>
-	<script type="text/javascript" src="./js/angular.min.js"></script>
-	<script type="text/javascript" src="./js/gen.js"></script>
-	<style>
-		div.app {
-			width:95%;
-		}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../js/jquery-3.2.0.min.js"></script>
+    <script type="text/javascript" src="../js/angular.min.js"></script>
+    <script type="text/javascript" src="../js/gen.js"></script>
+    <style>
+        div.app {
+            width:95%;
+        }
 
-		div.step {
-			border-style: solid;
-			border-width: 1px;
-		}
-		
-		div:nth-child(2n) {
-			background: palegoldenrod;
-		}
-		
-		input.full {
-			width:95%;
-		}
-		
-		textarea.full {
-			width:95%;
-			height:200px;
-		}
-		
-		span.block {
-			display:block;
-			width:95%;
-		}
-	</style>
+        div.step {
+            border-style: solid;
+            border-width: 1px;
+        }
+        
+        div:nth-child(2n) {
+            background: palegoldenrod;
+        }
+        
+        input.full {
+            width:95%;
+        }
+        
+        textarea.full {
+            width:95%;
+            height:200px;
+        }
+        
+        span.block {
+            display:block;
+            width:95%;
+        }
+    </style>
 </head>
 <body>
 <div ng-app="myApp" ng-controller="myCtrl" class="app ng-scope">
@@ -82,7 +82,7 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
         continue;
       }
       
-      result[i] = fileAndPath[1].trim().replace('javasrc', symbolText).replace(new RegExp("\\\\", 'g'), pathSplitSymbol) + pathSplitSymbol +  fileAndPath[0].trim() + '.java';
+      result[i] = symbolText + pathSplitSymbol + fileAndPath[1].trim().replace('javasrc\\', '').replace(new RegExp("\\\\", 'g'), pathSplitSymbol) + pathSplitSymbol +  fileAndPath[0];
       this.transferResult = this.transferResult + result[i] + '\n';
     }
     
@@ -91,7 +91,7 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
   
 });
 
-var fileTypes = ['.java', '.xml', '.sh', '.sql'];
+var fileTypes = ['.java', '.xml', '.sh', '.sql', 'txt'];
 
 function getFileAndPathByFileType(fileAndPath, fileType) {
   fileAndPath = fileAndPath.split(fileType);
@@ -102,10 +102,11 @@ function getFileAndPathByFileType(fileAndPath, fileType) {
 
 function getFileAndPath(fileAndPath) {
   var result = false;
-  for(var i = 0; i < fileTypes; i++) {
+  for(var i = 0; i < fileTypes.length; i++) {
     result = getFileAndPathByFileType(fileAndPath, fileTypes[i]);
     if (result == false) continue;
     
+    result[0] += fileTypes[i];
     break;
   }
   

@@ -1,9 +1,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<script type="text/javascript" src="../js/jquery-3.2.0.min.js"></script>
-<script type="text/javascript" src="../js/angular.min.js"></script>
-<script type="text/javascript" src="../js/gen.js"></script>
+<script type="text/javascript" src="../../js/jquery-3.2.0.min.js"></script>
+<script type="text/javascript" src="../../js/angular.min.js"></script>
+<script type="text/javascript" src="../../js/gen.js"></script>
 <style>
     div.step {
         border-style: solid;
@@ -24,52 +24,61 @@
 </style>
 </head>
 <body>
-test
 <div ng-app="myApp" ng-controller="myCtrl">
     <div id="root">
     </div>
+    <input type="text" id="path" value="D:\" />
+    <input type="button" ng-click="getFilesList($event)" value="get files list" />
+    <textarea id="result">
+    </textarea>
+    <table>
+        <tr ng-repeat="filePath in filePaths">
+            <td><input type="checkbox" id="path" name="path"  value="filePath.path">{{filePath.path}}</td>
+        </tr>
+    </table>
+    {{selectedFilePaths}}
 </div>
 <script type="text/javascript">
 var app = angular.module('myApp', []);
 
 var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
-    /*
-    $http.get("welcome.htm")
-    .then(function(response) {
-        $scope.myWelcome = response.data;
-    });
-    */
     
-    $scope.ajaxSend = function($event) {
-        var divStep = angular.element($event.currentTarget).parent();
-        var urlElement = divStep.find('input[' + gen.type.isUrl + ']').get();
-        var sendUrl = urlElement[0].value;
-        var paramsElement = divStep.find('[' + gen.type.isParam + ']').get();
-        var sendParams = {};
-        var paramElement;
-        for(var index in paramsElement) {
-            paramElement = paramsElement[index];
-            sendParams[paramElement.id] = paramElement.value;
-        }
+    $scope.filePaths = [];
+    
+    $scope.selectedFilePaths = null;
+    
+    $scope.getFilesList = function($event) {
+        var sendUrl = 'http://localhost:8091/main/api/fileslist';
+        var path = angular.element('#path').val();
         
-        var result;
-        var oldResult = divStep.find('textarea[id=result]').get();
-        if (oldResult.length > 0) oldResult[0].remove();
+        result = angular.element("#result");
         
-        result = angular.element("<textarea></textarea>");
-        result.attr("id", "result");
-        
+        //var httpResult =
         $http({
             method : "POST",
             url : sendUrl,
-            params : sendParams,
-        }).then(function mySucces(response) {
-            result.html(JSON.stringify(response.data));
-            divStep.append(result);
+            params : {path},
+        }).then(function mySuccess(response) {
+            var resultContent = JSON.stringify(response.data.data)
+            var resultBoolean = false;
+            if (response.data.result === true) {
+              resultBoolean = true;
+              
+              if (response.data.data.length != 0) {
+                $scope.filePaths = response.data.data;
+              }
+            } else {
+              $scope.filePaths = null;
+            }
+            
+            result.html("result : " + resultBoolean + ", " + resultContent);
+            
+            //return response.data;
         }, function myError(response) {
             console.log(response.statusText);
             result.html(JSON.stringify(response.data));
             divStep.append(result);
+            //return [];
         });
     }
     
@@ -77,31 +86,7 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
         $compile(ngElement);
     }
 });
-
-var url = "www.google.com";
-var stepCount = 0;
-
-var root = angular.element('#root');
-stepCount++;
-/*
-var genElement = new gen(root, stepCount, 'step')
-                 .genText('test input : ', 'test' + stepCount, '456', gen.type.isParam, null)
-                 .genSelect('pick one : ', 'select' + stepCount, ["1", "2", "3"], ["4", "5", "6"], true);
-
-stepCount++;
-var genElement = new gen(root, stepCount, 'step')
-                 .genSelect('pick one : ', 'select' + stepCount, ["7", "8", "9"], ["10", "11", "12"], true)
-                 .genText('test input : ', 'test' + stepCount, '456', gen.type.isParam, null).genPostBtn(null, 'btn' + stepCount, "Send", "ajaxSend($event)");
-*/
-stepCount++;
-var genElement;
-genElement = new gen(root, stepCount, 'step')
-                 .genText('func : ', 'func', '', gen.type.isParam, null)
-                 .genText('path : ', 'path', '', gen.type.isParam, null)
-                 .genCheckBox('isModified : ', 'isModified', '', gen.type.isParam, null)
-                 .genText('url : ', 'url' + stepCount, 'http://localhost:8091/page', gen.type.isUrl, 'url')
-                 .genPostBtn(null, 'btn' + stepCount, "Send", "ajaxSend($event)");
-
+                 
 </script>
 </body>
 </html>

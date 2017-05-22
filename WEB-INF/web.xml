@@ -27,10 +27,10 @@
     <servlet-class>com.andy.testweb.servlet.FilesList</servlet-class>
   </servlet>
   <servlet>
-    <servlet-name>main</servlet-name>
-    <servlet-class>com.andy.testweb.servlet.main</servlet-class>
+    <servlet-name>Main</servlet-name>
+    <servlet-class>com.andy.testweb.servlet.Main</servlet-class>
   </servlet>
-  
+  <!--
   <servlet-mapping>
     <servlet-name>HelloWorld</servlet-name>
     <url-pattern>/helloworld/*</url-pattern>
@@ -39,8 +39,9 @@
     <servlet-name>FilesList</servlet-name>
     <url-pattern>/fileslist/*</url-pattern>
   </servlet-mapping>
+  -->
   <servlet-mapping>
-    <servlet-name>main</servlet-name>
+    <servlet-name>Main</servlet-name>
     <url-pattern>/main/*</url-pattern>
   </servlet-mapping>
 

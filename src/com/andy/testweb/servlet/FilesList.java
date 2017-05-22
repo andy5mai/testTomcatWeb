@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
 import com.andy.file.FileManager;
+import com.andy.util.ApiResult;
 import com.andy.util.ZipUtil;
 import com.google.gson.Gson;
 
@@ -17,34 +18,48 @@ public class FilesList extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 //    resp.getWriter().println("doGet is not available");
-    resp.getWriter().println(new Gson().toJson(getFileList()));
+    //resp.getWriter().println(new Gson().toJson(getFileList()));
+//    req.getRequestDispatcher("/page/FilesList.jsp").forward(req, resp);
   }
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     
-    String[] strs = req.getParameterValues("test");
-    resp.getWriter().println(new Gson().toJson(strs));
+    String path = req.getParameter("path");
     
-    resp.getWriter().println(new Gson().toJson(getFileList()));
+    List<File> filesList = getFileList(path);
+    
+    boolean getFilesListResult = (filesList != null);
+    ApiResult result = new ApiResult(getFilesListResult, filesList);
+    
+    resp.setContentType("text/html; charset=UTF-8");
+    resp.getWriter().println(new Gson().toJson(result));
+
+    //resp.getWriter().println(new Gson().toJson(strs));
+    //req.getRequestDispatcher("/page/FilesList.jsp").forward(req, resp);
     
   }
 
-  private List<File> getFileList() {
+  private List<File> getFileList(String path) {
     
     List<File> filesResult = new ArrayList<File>();
     try {
       
-      File dir = new File("d:\\test\\bin\\");
+      File dir = new File(path);
 
+      if (dir.exists() == false) return null;
+      
       FileManager fileManager = new FileManager();
       
-      Calendar startTime = Calendar.getInstance();
-      Calendar endTime = Calendar.getInstance();
-      startTime.add(Calendar.MINUTE, -60 * 24 * 2);
-      System.out.println(fileManager.getDateFormat().format(startTime.getTime()));
+//      Calendar startTime = Calendar.getInstance();
+//      Calendar endTime = Calendar.getInstance();
+//      startTime.add(Calendar.MINUTE, -60 * 24 * 2);
+//      System.out.println(fileManager.getDateFormat().format(startTime.getTime()));
 
-      fileManager.searchDirFilesByModifiedTimeRange(dir, startTime.getTimeInMillis(), endTime.getTimeInMillis(), filesResult);
+      long startTimeMillis = 0;
+      long endTimeMillis = 0;
+//      fileManager.searchDirFilesByModifiedTimeRange(dir, startTimeMillis, endTimeMillis, filesResult);
+      fileManager.getDirFilesByModifiedTimeRange(dir, startTimeMillis, endTimeMillis, filesResult);
 
       if (filesResult.size() <= 0) {
         System.out.println("there are no any files");
@@ -75,7 +90,7 @@ public class FilesList extends HttpServlet {
     return filePaths;
   }
   
-  private File getZipFile() {
+  private File getZipFile(List<File> filesList) {
     String workingDir = System.getProperty("user.dir");
     File tempZipFile = null;
     
@@ -89,7 +104,6 @@ public class FilesList extends HttpServlet {
       fileManager.deleteDirectory(tempFile);
       tempFile.mkdir();
       String commonFilePath = fileManager.getCommonFile().getPath().replaceAll("\\\\", "/");
-      List<File> filesList = getFileList();
       for (File fileTemp : filesList) {
   
         tempFile = new File(fileTemp.getParent().replaceAll("\\\\", "/").replaceFirst(commonFilePath, strTempFilePath).replaceAll("/", "\\\\"));
