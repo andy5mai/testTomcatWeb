@@ -24,19 +24,27 @@
 </style>
 </head>
 <body>
-<div ng-app="myApp" ng-controller="myCtrl">
+<div ng-app="myApp" ng-controller="myCtrl" >
     <div id="root">
     </div>
     <input type="text" id="path" value="D:\" />
     <input type="button" ng-click="getFilesList($event)" value="get files list" />
     <textarea id="result">
     </textarea>
+    <div style="height:250px; width:500px; overflow: scroll;">
     <table>
         <tr ng-repeat="filePath in filePaths">
-            <td><input type="checkbox" id="path" name="path"  value="filePath.path">{{filePath.path}}</td>
+            <td><input type="checkbox" id="path" name="path"  value="{{filePath.path}}" ng-click="pickFile($event)">{{filePath.path}}</td>
         </tr>
     </table>
-    {{selectedFilePaths}}
+    </div>
+    <div style="height:250px; width:500px; overflow: scroll;">
+    <table>
+        <tr ng-repeat="filePath in selectedFilePaths">
+            <td>{{filePath}}</td>
+        </tr>
+    </table>
+    </div>
 </div>
 <script type="text/javascript">
 var app = angular.module('myApp', []);
@@ -45,7 +53,7 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
     
     $scope.filePaths = [];
     
-    $scope.selectedFilePaths = null;
+    $scope.selectedFilePaths = [];
     
     $scope.getFilesList = function($event) {
         var sendUrl = 'http://localhost:8091/main/api/fileslist';
@@ -80,6 +88,20 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
             divStep.append(result);
             //return [];
         });
+    }
+    
+    $scope.pickFile = function($event) {
+      if ($event.target.checked == true) {
+        $scope.selectedFilePaths.push($event.target.value);
+        
+      } else {
+        var $targetIndex = $scope.selectedFilePaths.indexOf($event.target.value);
+        if ($targetIndex <= -1) {
+          alert("can't find this element to unselected!");
+        } else {
+          $scope.selectedFilePaths.splice($targetIndex, 1);
+        }
+      }
     }
     
     $scope.compile = function(ngElement) {

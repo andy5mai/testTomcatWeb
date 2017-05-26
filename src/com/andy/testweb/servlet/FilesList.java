@@ -17,9 +17,7 @@ public class FilesList extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//    resp.getWriter().println("doGet is not available");
-    //resp.getWriter().println(new Gson().toJson(getFileList()));
-//    req.getRequestDispatcher("/page/FilesList.jsp").forward(req, resp);
+    System.out.println("FilesList doGet...");
   }
 
   @Override
