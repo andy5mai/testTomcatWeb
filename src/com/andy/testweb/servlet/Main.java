@@ -37,8 +37,13 @@ public class Main extends HttpServlet {
     
     String[] uris = req.getPathInfo().split("/");
     
-    if (uris[1].equals("api")) {
-      new FilesList().doPost(req, resp);
+    if (uris[1].equals("api") && uris.length >= 3) {
+      if (uris[2].equals("fileslist")) {
+        new FilesList().doPost(req, resp);
+      } else if (uris[2].equals("compressfiles")) {
+        new CompressFiles().doPost(req, resp);
+      }
+      
       return;
     }
     

@@ -21,29 +21,55 @@
 	span.block {
 		display:block;
 	}
+  
+    .Block {
+        display: block;
+    }
+  
+    .InlineBlock {
+        display: inline-block;
+    }
+  
+    .FilesList {
+        height:800px;
+        width:700px;
+        overflow: scroll;
+    }
 </style>
 </head>
 <body>
 <div ng-app="myApp" ng-controller="myCtrl" >
-    <div id="root">
-    </div>
     <input type="text" id="path" value="D:\" />
     <input type="button" ng-click="getFilesList($event)" value="get files list" />
+    <input type="button" ng-click="getZipFile($event)" value="compress selected files" />
     <textarea id="result">
     </textarea>
-    <div style="height:250px; width:500px; overflow: scroll;">
-    <table>
-        <tr ng-repeat="filePath in filePaths">
-            <td><input type="checkbox" id="path" name="path"  value="{{filePath.path}}" ng-click="pickFile($event)">{{filePath.path}}</td>
-        </tr>
-    </table>
-    </div>
-    <div style="height:250px; width:500px; overflow: scroll;">
+    <div class="Block">
+      <div class="FilesList InlineBlock">
+        <table>
+            <tr ng-repeat="filePath in filePaths">
+                <td>
+                  <input type="checkbox" id="path" name="path"  value="{{filePath.path}}" ng-checked="selectedFilePaths.indexOf(filePath.path) !== -1" ng-click="pickFile($event)">
+                  <label ng-if="filePath.isParentDir == true">
+                      <a href="" path="{{filePath.path}}" ng-click="clickDirPath($event)">...</a>
+                  </label>
+                  <label ng-if="filePath.isParentDir == false && filePath.isDir == true">
+                      <a href="" path="{{filePath.path}}" ng-click="clickDirPath($event)">{{filePath.path}}</a>
+                  </label>
+                  <label ng-if="filePath.isDir == false">
+                      <label>{{filePath.path}}</label>
+                  </label>
+                </td>
+            </tr>
+        </table>
+      </div>
+    <div class="FilesList InlineBlock">
     <table>
         <tr ng-repeat="filePath in selectedFilePaths">
             <td>{{filePath}}</td>
         </tr>
     </table>
+    </div>
     </div>
 </div>
 <script type="text/javascript">
@@ -54,6 +80,12 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
     $scope.filePaths = [];
     
     $scope.selectedFilePaths = [];
+    
+    $scope.clickDirPath = function($event) {
+      angular.element('#path').val($event.target.getAttribute("path"));
+      $scope.getFilesList($event);
+    }
+    
     
     $scope.getFilesList = function($event) {
         var sendUrl = 'http://localhost:8091/main/api/fileslist';
@@ -88,6 +120,41 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
             divStep.append(result);
             //return [];
         });
+    }
+    
+    $scope.getZipFile = function($event) {
+      var sendUrl = 'http://localhost:8091/main/api/compressfiles';
+      var selectedFilePaths = $scope.selectedFilePaths;
+      
+      result = angular.element("#result");
+      
+      //var httpResult =
+      $http({
+          method : "POST",
+          url : sendUrl,
+          params : {selectedFilePaths},
+      }).then(function mySuccess(response) {
+          var resultContent = JSON.stringify(response.data.data)
+          var resultBoolean = false;
+          if (response.data.result === true) {
+            resultBoolean = true;
+            
+            if (response.data.data.length != 0) {
+              $scope.zipFilePath = response.data.data;
+            }
+          } else {
+            $scope.zipFilePath = null;
+          }
+          
+          result.html("result : " + resultBoolean + ", " + resultContent);
+          
+          //return response.data;
+      }, function myError(response) {
+          console.log(response.statusText);
+          result.html(JSON.stringify(response.data));
+          divStep.append(result);
+          //return [];
+      });
     }
     
     $scope.pickFile = function($event) {

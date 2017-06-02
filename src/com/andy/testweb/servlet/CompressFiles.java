@@ -14,7 +14,7 @@ import com.andy.util.ApiResult;
 import com.andy.util.ZipUtil;
 import com.google.gson.Gson;
 
-public class FilesList extends HttpServlet {
+public class CompressFiles extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -24,15 +24,13 @@ public class FilesList extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     
-    String path = req.getParameter("path");
+    String selectedFilePaths = req.getParameter("selectedFilePaths");
     
-    List<FileObj> filesList = getFileList(path);
     
-    boolean getFilesListResult = (filesList != null);
-    ApiResult result = new ApiResult(getFilesListResult, filesList);
-    
-    resp.setContentType("text/html; charset=UTF-8");
-    resp.getWriter().println(new Gson().toJson(result));
+//    ApiResult result = new ApiResult(getFilesListResult, filesList);
+//    
+//    resp.setContentType("text/html; charset=UTF-8");
+//    resp.getWriter().println(new Gson().toJson(result));
 
     //resp.getWriter().println(new Gson().toJson(strs));
     //req.getRequestDispatcher("/page/FilesList.jsp").forward(req, resp);
