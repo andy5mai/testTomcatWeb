@@ -9,7 +9,8 @@ class gen {
 	}
 	
 	static get type() { return { isUrl : "isUrl",
-							     isParam : "isParam" }
+							     isParam : "isParam",
+								 isParamsArray : "isParamsArray"}
 	}
 	
 	getNewP() {
@@ -24,10 +25,14 @@ class gen {
 		return angular.element('<span>' + text + '</span>');
 	}
 	
-	includeElement(text, funcObj) {
+	includeTextSpan(text, funcObj) {
 		var oriContainer = this.container;
 		this.container = this.getNewSpanLine();
-		this.genSpan(text);
+		if (text == null) {
+		  this.genSpan();
+		} else {
+		  this.genTextSpan(text);
+		}
 		
 		funcObj.exec(this.container);
 		
@@ -44,9 +49,18 @@ class gen {
 		return this;
 	}
 	
-	genSpan(text) {
-		this.container.append(this.getNewSpan(text));
+	genTextSpan(text) {
+	  var spanElement = this.genSpan();
+		spanElement.text(text);
+		
 		return this;
+	}
+	
+	genSpan() {
+	  var spanElement = angular.element('<span></span>');
+	  this.container.append(spanElement);
+	  
+	  return spanElement;
 	}
 	
 	genText(text, id, value, type, className) {
@@ -65,7 +79,7 @@ class gen {
 							container.append(input);
 					  }};
 		
-		this.includeElement(text, funcObj);
+		this.includeTextSpan(text, funcObj);
 		
 		return this;
 	}
@@ -93,7 +107,7 @@ class gen {
               container.append(input);
             }};
     
-    this.includeElement(spanText, funcObj);
+    this.includeTextSpan(spanText, funcObj);
     
     return this;
   }
@@ -138,7 +152,7 @@ class gen {
 			}
 		}
 						  
-		this.includeElement(text, funcObj);
+		this.includeTextSpan(text, funcObj);
 		return this;
 	}
 	
@@ -171,7 +185,7 @@ class gen {
 						}
 		}
 					  
-		this.includeElement(text, funcObj);
+		this.includeTextSpan(text, funcObj);
 		
 		return this;
 	}
@@ -180,5 +194,27 @@ class gen {
 		var btn = angular.element('<button ng-click="' + clickFunc + '">' + value + '</button>');
 		this.container.append(btn);
 		return this;
+	}
+	
+	genAddElmtBtn(text, id, value, clickFunc) {
+	  
+	  var funcObj = {
+	      id : id,
+        value : value,
+        clickFunc : clickFunc,
+        exec : function(container) {
+          var btn = angular.element('<button ng-click="' + clickFunc + '">' + value + '</button>');
+          
+          container.append(btn);
+        }
+	  }
+        
+	  this.includeTextSpan(text, funcObj);
+	  
+    return this;
+  }
+	
+	static addElmtBtn($event) {
+	  console.log($event);
 	}
 }

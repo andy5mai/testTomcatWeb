@@ -21,7 +21,7 @@ public class ZipUtil {
   private static void recurseFiles(File file, ZipOutputStream zos, String dir) throws IOException, FileNotFoundException {
     // 目錄
     if (file.isDirectory()) {
-      System.out.println("找到資料夾:" + file.getName());
+      System.out.println("find directory : " + file.getName());
       dir += file.getName() + File.separator;
       String[] fileNames = file.list();
       if (fileNames != null) {

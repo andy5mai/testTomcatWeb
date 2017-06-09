@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
@@ -11,11 +12,14 @@ import javax.servlet.http.*;
 import com.andy.file.FileManager;
 import com.andy.file.FileObj;
 import com.andy.util.ApiResult;
+import com.andy.util.MapUtil;
 import com.andy.util.ZipUtil;
 import com.google.gson.Gson;
 
 public class CompressFiles extends HttpServlet {
 
+  protected FileManager fileManager;
+  
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     System.out.println("FilesList doGet...");
@@ -24,13 +28,18 @@ public class CompressFiles extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     
-    String selectedFilePaths = req.getParameter("selectedFilePaths");
+    Map paramMap = req.getParameterMap();
+    String[] selectedFilePaths = (String[])paramMap.get("selectedFilePaths");
     
+    this.fileManager = new FileManager();
+    File[] files = this.setPathWeightsByFileList(selectedFilePaths);
     
-//    ApiResult result = new ApiResult(getFilesListResult, filesList);
-//    
-//    resp.setContentType("text/html; charset=UTF-8");
-//    resp.getWriter().println(new Gson().toJson(result));
+    File zipFile = this.getZipFile(files);
+    boolean zipFileResult = (zipFile != null);
+    ApiResult result = new ApiResult(zipFileResult, zipFile);
+    
+    resp.setContentType("text/html; charset=UTF-8");
+    resp.getWriter().println(new Gson().toJson(result));
 
     //resp.getWriter().println(new Gson().toJson(strs));
     //req.getRequestDispatcher("/page/FilesList.jsp").forward(req, resp);
@@ -70,44 +79,57 @@ public class CompressFiles extends HttpServlet {
     return filesResult;
   }
   
-  private String[] getFileList(List<File> filesResult, FileManager fileManager) {
-    String[] filePaths = new String[0];
-    File file;
-    filePaths = new String[filesResult.size()];
-    for (int i = 0; i < filesResult.size(); i++) {
-      // System.out.println("file : " + file.getPath());
-      file = filesResult.get(i);
-      filePaths[i] = file.getPath();
-      fileManager.setPathWeights(file);
+//  private String[] setPathWeightsByFileList(List<File> filesResult, FileManager fileManager) {
+//    String[] filePaths = new String[0];
+//    File file;
+//    filePaths = new String[filesResult.size()];
+//    for (int i = 0; i < filesResult.size(); i++) {
+//      // System.out.println("file : " + file.getPath());
+//      file = filesResult.get(i);
+//      filePaths[i] = file.getPath();
+//      fileManager.setPathWeights(file);
+//    }
+//
+//    System.out.println("commonWeight : " + fileManager.getCommonWeight() + ", commonFile : " + fileManager.getCommonFile().getPath());
+//    System.out.println("filePaths Json : " + new Gson().toJson(filePaths));
+//    
+//    return filePaths;
+//  }
+  
+  private File[] setPathWeightsByFileList(String[] filePaths) {
+    
+    File[] files = new File[filePaths.length];
+    for (int i = 0; i < filePaths.length; i++) {
+      files[i] = new File(filePaths[i]);
+      this.fileManager.setPathWeights(files[i]);
     }
 
     System.out.println("commonWeight : " + fileManager.getCommonWeight() + ", commonFile : " + fileManager.getCommonFile().getPath());
     System.out.println("filePaths Json : " + new Gson().toJson(filePaths));
     
-    return filePaths;
+    return files;
   }
   
-  private File getZipFile(List<File> filesList) {
+  private File getZipFile(File[] files) {
     String workingDir = System.getProperty("user.dir");
     File tempZipFile = null;
     
     try {
     
-      FileManager fileManager = new FileManager();
-      String strTempFilePath = ".\\\\temp";
+      String strTempDirPath = ".\\\\temp\\\\";
       
-      File tempFile = new File(strTempFilePath);
-      
-      fileManager.deleteDirectory(tempFile);
-      tempFile.mkdir();
-      String commonFilePath = fileManager.getCommonFile().getPath().replaceAll("\\\\", "/");
-      for (File fileTemp : filesList) {
+      File tempDir = new File(strTempDirPath);
+      File tempFile;
+      this.fileManager.deleteDirectory(tempDir);
+      tempDir.mkdir();
+      String commonFilePath = this.fileManager.getCommonFile().getPath().replaceAll("\\\\", "/");
+      for (File fileTemp : files) {
   
-        tempFile = new File(fileTemp.getParent().replaceAll("\\\\", "/").replaceFirst(commonFilePath, strTempFilePath).replaceAll("/", "\\\\"));
+        tempFile = new File(fileTemp.getParent().replaceAll("\\\\", "/").replaceFirst(commonFilePath, strTempDirPath).replaceAll("/", "\\\\"));
         tempFile.mkdirs();
         tempFile = new File(tempFile.getPath() + File.separator + fileTemp.getName());
         // // tempFile.createNewFile();
-        fileManager.copyFile(fileTemp, tempFile);
+        this.fileManager.copyFile(fileTemp, tempFile);
       }
       
       tempZipFile = new File(workingDir + File.separator + "tempZip.zip");
@@ -115,8 +137,9 @@ public class CompressFiles extends HttpServlet {
         tempZipFile.delete();
       }
       
-      ZipUtil.makeZip(fileManager.getCommonFile(), tempZipFile);
+      ZipUtil.makeZip(tempDir, tempZipFile);
     } catch (Exception exc) {
+      tempZipFile = null;
       exc.printStackTrace();
     }
     
