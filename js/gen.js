@@ -9,35 +9,49 @@ class gen {
 	}
 	
 	static get type() { return { isUrl : "isUrl",
-							     isParam : "isParam",
-								 isParamsArray : "isParamsArray"}
+							                                    isParam : "isParam",
+							                                    isParamsArray : "isParamsArray"}
+	}
+	
+	static set http($http) {
+	  this.$http = $http;
 	}
 	
 	getNewP() {
 		return angular.element('<p></p>');
 	}
 	
-	getNewSpanLine() {
-		return angular.element('<span class="block"></span>');
+	getNewSpan(text, clazz) {
+	  
+	  var element = angular.element('<span></span>');
+	  
+	  if (text != null) {
+	    element.text(text);
+	  }
+	  
+	  if (clazz != null) {
+	    element.addClass(clazz);
+	  }
+	  
+		return element
 	}
 	
-	getNewSpan(text) {
-		return angular.element('<span>' + text + '</span>');
+	genNewSpan(text, clazz) {
+	  this.container.append(this.getNewSpan(text, clazz));
+	  return this;
 	}
 	
-	includeTextSpan(text, funcObj) {
-		var oriContainer = this.container;
-		this.container = this.getNewSpanLine();
-		if (text == null) {
-		  this.genSpan();
-		} else {
-		  this.genTextSpan(text);
-		}
+	includeTextSpan(text, funcObj, ) {
 		
-		funcObj.exec(this.container);
-		
-		oriContainer.append(this.container);
-		this.container = oriContainer;
+	  var blockSpan = this.getNewSpan(null, 'block');
+	  
+	  var funcObjContainer = this.getNewSpan(null, null);
+    funcObj.exec(funcObjContainer);
+    
+    blockSpan.append(this.getNewSpan(text, null));
+    blockSpan.append(funcObjContainer);
+	  
+		this.container.append(blockSpan);
 	}
 	
 	genP(id) {
@@ -47,20 +61,6 @@ class gen {
 			this.container.append(angular.element('<p></p>'));
 		}
 		return this;
-	}
-	
-	genTextSpan(text) {
-	  var spanElement = this.genSpan();
-		spanElement.text(text);
-		
-		return this;
-	}
-	
-	genSpan() {
-	  var spanElement = angular.element('<span></span>');
-	  this.container.append(spanElement);
-	  
-	  return spanElement;
 	}
 	
 	genText(text, id, value, type, className) {
@@ -198,23 +198,79 @@ class gen {
 	
 	genAddElmtBtn(text, id, value, clickFunc) {
 	  
-	  var funcObj = {
-	      id : id,
-        value : value,
-        clickFunc : clickFunc,
-        exec : function(container) {
-          var btn = angular.element('<button ng-click="' + clickFunc + '">' + value + '</button>');
-          
-          container.append(btn);
-        }
-	  }
-        
-	  this.includeTextSpan(text, funcObj);
+	  var lastSpan = this.container.children()[this.container.children().length - 1];
+	  var addElmtBtn = angular.element('<button ng-click="' + clickFunc + '">' + value + '</button>');
+	  var addElmtBtnSpan = this.getNewSpan(null, null);
+	  addElmtBtnSpan.append(addElmtBtn);
 	  
-    return this;
+	  $(lastSpan).append(addElmtBtnSpan);
+	  
+	  return this;
   }
 	
 	static addElmtBtn($event) {
-	  console.log($event);
+	  var preElement = $($event.target.parentElement).prev()[0];
+	  var oriElement = preElement.children[0];
+	  $(preElement).append($(oriElement).clone());
+	}
+	
+	static ajaxSend($event) {
+	  var divStep = angular.element($event.currentTarget).parent();
+    var urlElement = divStep.find('input[' + gen.type.isUrl + ']').get();
+    var sendUrl = urlElement[0].value;
+    var paramsElement = divStep.find('[' + gen.type.isParam + ']').get();
+    var paramsArrayElement = divStep.find('[' + gen.type.isParamsArray + ']').get();
+    var sendParams = {};
+    var paramElement;
+    for(var index in paramsElement) {
+        paramElement = paramsElement[index];
+        if (paramElement.type == 'checkbox') {
+          sendParams[paramElement.id] = $(paramElement).prop('checked');
+          continue;
+        }
+        sendParams[paramElement.id] = paramElement.value;
+    }
+    
+    for(var index in paramsArrayElement) {
+      paramElement = paramsArrayElement[index];
+      
+      if (sendParams[paramElement.id] == null) {
+        sendParams[paramElement.id] = '';
+      }
+      
+      if (paramElement.value === null || paramElement.value === "") {
+        continue;
+      }
+      
+      if (sendParams[paramElement.id] != '') {
+        sendParams[paramElement.id] = sendParams[paramElement.id] + ',';
+      }
+      sendParams[paramElement.id] = sendParams[paramElement.id] + paramElement.value;
+    }
+    
+    var result;
+    var oldResult = divStep.find('textarea[id=result]').get();
+    if (oldResult.length > 0) {
+      for (var i = 0; i < oldResult.length; i++) {
+        oldResult[i].remove();
+      }
+    }
+    
+    result = angular.element("<textarea></textarea>");
+    result.attr("id", "result");
+    result.addClass("result");
+    
+    gen.$http({
+        method : "POST",
+        url : sendUrl,
+        params : sendParams,
+    }).then(function mySucces(response) {
+        result.html(JSON.stringify(response.data));
+        divStep.append(result);
+    }, function myError(response) {
+        console.log(response.statusText);
+        result.html(JSON.stringify(response.data));
+        divStep.append(result);
+    });
 	}
 }
