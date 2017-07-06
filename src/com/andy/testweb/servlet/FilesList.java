@@ -1,6 +1,7 @@
 package com.andy.testweb.servlet;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -24,12 +25,33 @@ public class FilesList extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     
+    long startTimeMillis = 0;
+    long endTimeMillis = 0;
+    ApiResult result;
     String path = req.getParameter("path");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+    String modifiedStartDateStr = req.getParameter("modifiedStartDate");
+    String modifiedEndDateStr = req.getParameter("modifiedEndDate");
     
-    List<FileObj> filesList = getFileList(path);
-    
-    boolean getFilesListResult = (filesList != null);
-    ApiResult result = new ApiResult(getFilesListResult, filesList);
+    try {
+      if (modifiedStartDateStr.isEmpty() || modifiedEndDateStr.isEmpty()) {
+        startTimeMillis = 0;
+        endTimeMillis = 0;
+      } else {
+        startTimeMillis = sdf.parse(modifiedStartDateStr).getTime();
+        endTimeMillis = sdf.parse(modifiedEndDateStr).getTime();
+      }
+      
+      List<FileObj> filesList = getFileList(path, startTimeMillis, endTimeMillis);
+      
+      boolean getFilesListResult = (filesList != null);
+      result = new ApiResult(getFilesListResult, filesList);
+      
+      
+    } catch (Exception exc) {
+      result = new ApiResult(false, null);
+      exc.printStackTrace();
+    }
     
     resp.setContentType("text/html; charset=UTF-8");
     resp.getWriter().println(new Gson().toJson(result));
@@ -39,7 +61,7 @@ public class FilesList extends HttpServlet {
     
   }
 
-  private List<FileObj> getFileList(String path) {
+  private List<FileObj> getFileList(String path, long startTimeMillis, long endTimeMillis) {
     
     List<FileObj> filesResult = new ArrayList<FileObj>();
     try {
@@ -55,8 +77,8 @@ public class FilesList extends HttpServlet {
 //      startTime.add(Calendar.MINUTE, -60 * 24 * 2);
 //      System.out.println(fileManager.getDateFormat().format(startTime.getTime()));
 
-      long startTimeMillis = 0;
-      long endTimeMillis = 0;
+//      long startTimeMillis = 0;
+//      long endTimeMillis = 0;
 //      fileManager.searchDirFilesByModifiedTimeRange(dir, startTimeMillis, endTimeMillis, filesResult);
       fileManager.getDirFilesByModifiedTimeRange(dir, startTimeMillis, endTimeMillis, filesResult);
 

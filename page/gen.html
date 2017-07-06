@@ -96,12 +96,12 @@ var genElement = new gen(root, stepCount, 'step')
 stepCount++;
 var genElement;
 genElement = new gen(root, stepCount, 'step')
-                 .getTextSpan("我的學習-我的課程")
+                 .genNewSpan("我的學習-我的課程", null)
                  .genText('url : ', 'url' + stepCount, 'http://4a/DataServlet?pg=MyCourseAjaxPage&cmd=getMyCourseList', gen.type.isUrl, 'url')
                  .genClickBtn(null, 'btn' + stepCount, "Send", "ajaxSend($event)");
 
 genElement = new gen(root, stepCount, 'step')
-.getTextSpan("我的學習-我的課程")
+.genNewSpan("我的學習-我的課程", null)
 .genText('url : ', 'url' + stepCount, 'http://4a/DataServlet?pg=MyCourseAjaxPage&cmd=getMyCourseList', gen.type.isUrl, 'url')
 .genText('name : ', 'name', '', gen.type.isParam, null)
 .genText('courseType : ', 'courseType', '', gen.type.isParam, null)
@@ -142,7 +142,7 @@ genElement = new gen(root, stepCount, 'step')
 .genClickBtn(null, 'btn' + stepCount, "Send", "ajaxSend($event)");
 
 genElement = new gen(root, stepCount, 'step')
-.getTextSpan("課程庫-學生端-取得課程庫")
+.genNewSpan("課程庫-學生端-取得課程庫", null)
 .genText('url : ', 'url' + stepCount, 'http://4a/DataServlet?pg=home_data&feature=mycourse_library&cmd=retrieve', gen.type.isUrl, 'url')
 .genText('name : ', 'name', '', gen.type.isParam, null)
 .genText('startindex : ', 'startindex', '1', gen.type.isParam, null)
@@ -153,13 +153,13 @@ genElement = new gen(root, stepCount, 'step')
 .genClickBtn(null, 'btn' + stepCount, "Send", "ajaxSend($event)");
 
 genElement = new gen(root, stepCount, 'step')
-.getTextSpan("課程庫-學生端-取得班次")
+.genNewSpan("課程庫-學生端-取得班次", null)
 .genText('url : ', 'url' + stepCount, 'http://4a/DataServlet?pg=home_data&feature=course_order&cmd=retrieve', gen.type.isUrl, 'url')
 .genText('id : ', 'id', '4956', gen.type.isParam, null)
 .genClickBtn(null, 'btn' + stepCount, "Send", "ajaxSend($event)");
 
 genElement = new gen(root, stepCount, 'step')
-.getTextSpan("課程庫-學生端-取得班次學習紀錄")
+.genNewSpan("課程庫-學生端-取得班次學習紀錄", null)
 .genText('url : ', 'url' + stepCount, 'http://4a/DataServlet?pg=home_data&feature=course_order&cmd=retrieveRecord', gen.type.isUrl, 'url')
 .genText('id : ', 'id', '4956', gen.type.isParam, null)
 .genClickBtn(null, 'btn' + stepCount, "Send", "ajaxSend($event)");

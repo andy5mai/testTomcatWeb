@@ -206,7 +206,28 @@ class gen {
 	  $(lastSpan).append(addElmtBtnSpan);
 	  
 	  return this;
-  }
+	}
+	
+	genTextArea(text, id, value, type, className) {
+		
+		var funcObj = { id : id,
+						value : value,
+						type : type,
+						className : className,
+						exec : function(container) {
+							var textarea = angular.element('<textarea></textarea>');
+							textarea.attr("id", this.id);
+							textarea.text(this.value);
+							if (this.className != null) textarea.attr("class", this.className);
+							if (this.type != null) textarea.attr(this.type, true);
+							
+							container.append(textarea);
+					  }};
+		
+		this.includeTextSpan(text, funcObj);
+		
+		return this;
+	}
 	
 	static addElmtBtn($event) {
 	  var preElement = $($event.target.parentElement).prev()[0];

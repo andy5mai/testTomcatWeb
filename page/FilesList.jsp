@@ -2,8 +2,12 @@
 <head>
 <meta charset="UTF-8">
 <script type="text/javascript" src="../../js/jquery-3.2.0.min.js"></script>
-<script type="text/javascript" src="../../js/angular.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../../js/gen.js"></script>
+<script type="text/javascript" src="../../js/angular.min.js"></script>
+
+<script type="text/javascript" src="../../js/jquery-ui.min.js"></script>
+<link href="../../css/bootstrap.min.css" rel="stylesheet">
 <style>
     div.step {
         border-style: solid;
@@ -40,6 +44,8 @@
 <body>
 <div ng-app="myApp" ng-controller="myCtrl" >
     <input type="text" id="path" value="D:\" />
+    <input type="text" id="modifiedStartDate" value="" />
+    <input type="text" id="modifiedEndDate" value="" />
     <input type="button" ng-click="getFilesList($event)" value="get files list" />
     <input type="button" ng-click="getZipFile($event)" value="compress selected files" />
     <textarea id="result">
@@ -75,6 +81,9 @@
 <script type="text/javascript">
 var app = angular.module('myApp', []);
 
+$('#modifiedStartDate').datepicker({ dateFormat: 'yy/mm/dd' });
+$('#modifiedEndDate').datepicker({ dateFormat: 'yy/mm/dd' });
+
 var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
     
     $scope.filePaths = [];
@@ -90,6 +99,8 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
     $scope.getFilesList = function($event) {
         var sendUrl = 'http://localhost:8091/main/api/fileslist';
         var path = angular.element('#path').val();
+        var modifiedStartDate = angular.element('#modifiedStartDate').val();
+        var modifiedEndDate = angular.element('#modifiedEndDate').val();
         
         result = angular.element("#result");
         
@@ -97,7 +108,7 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
         $http({
             method : "POST",
             url : sendUrl,
-            params : {path},
+            params : {path, modifiedStartDate, modifiedEndDate},
         }).then(function mySuccess(response) {
             var resultContent = JSON.stringify(response.data.data)
             var resultBoolean = false;
@@ -117,7 +128,7 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
         }, function myError(response) {
             console.log(response.statusText);
             result.html(JSON.stringify(response.data));
-            divStep.append(result);
+            //divStep.append(result);
             //return [];
         });
     }
@@ -152,7 +163,7 @@ var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
       }, function myError(response) {
           console.log(response.statusText);
           result.html(JSON.stringify(response.data));
-          divStep.append(result);
+          //divStep.append(result);
           //return [];
       });
     }
