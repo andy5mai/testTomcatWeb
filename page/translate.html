@@ -1,0 +1,50 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="js/jquery-3.2.0.min.js"></script>
+<script type="text/javascript" src="js/angular.min.js"></script>
+<script type="text/javascript" src="js/unicodeasciiansi.js"></script>
+<style>
+    div.step {
+        border-style: solid;
+        border-width: 1px;
+    }
+    
+    div:nth-child(2n) {
+        background: palegoldenrod;
+    }
+    
+    input.url {
+        width:95%;
+    }
+	
+	span.block {
+		display:block;
+	}
+</style>
+</head>
+<body>
+<div ng-app="myApp" ng-controller="myCtrl">
+    <div id="root">
+    </div>
+</div>
+<textarea id="characterTa" name="characterTa"></textarea>
+<div>
+	<input type="checkbox" name="ignoreLetter" id="ignoreLetter" checked>不轉換字母或數字
+	<input type="button" value="character to unicode" onclick="native2ascii();">
+	<input type="button" value="unicode to character" onclick="ascii2native();">
+</div>
+<textarea id="asciiTa" name="asciiTa"></textarea>
+
+<script type="text/javascript">
+var app = angular.module('myApp', []);
+
+var myCtrl = app.controller('myCtrl', function($scope, $http, $compile) {
+    
+});
+
+
+
+</script>
+</body>
+</html>

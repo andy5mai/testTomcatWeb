@@ -9,8 +9,10 @@ class gen {
 	}
 	
 	static get type() { return { isUrl : "isUrl",
-							                                    isParam : "isParam",
-							                                    isParamsArray : "isParamsArray"}
+								 isParam : "isParam",
+							     isParamsArray : "isParamsArray",
+								 forDisplay : "forDisplay"
+							   }
 	}
 	
 	static set http($http) {
