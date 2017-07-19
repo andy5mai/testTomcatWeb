@@ -1,6 +1,8 @@
 package com.andy.testweb.servlet;
 
 import java.io.*;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -12,13 +14,17 @@ import javax.servlet.http.*;
 import com.andy.file.FileManager;
 import com.andy.file.FileObj;
 import com.andy.util.ApiResult;
-import com.andy.util.MapUtil;
+import com.andy.util.FileNameFilter;
 import com.andy.util.ZipUtil;
 import com.google.gson.Gson;
 
-public class CompressFiles extends HttpServlet {
-
+public class CompressFiles extends BaseServlet {
+  
   protected FileManager fileManager;
+  
+  public CompressFiles(HttpServlet httpServlet) {
+    super(httpServlet);
+  }
   
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -27,16 +33,35 @@ public class CompressFiles extends HttpServlet {
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    
+
     Map paramMap = req.getParameterMap();
     String[] selectedFilePaths = (String[])paramMap.get("selectedFilePaths");
-    
+
+    String commonDirPath = req.getParameter("commonDirPath");
     this.fileManager = new FileManager();
-    File[] files = this.setPathWeightsByFileList(selectedFilePaths);
+    File[] files;
+    if (commonDirPath != null && commonDirPath.isEmpty() != true) {
+      files = this.fileManager.setCommonFile(selectedFilePaths, commonDirPath);
+    } else {
+      files = this.setPathWeightsByFileList(selectedFilePaths);
+    }
     
-    File zipFile = this.getZipFile(files);
-    boolean zipFileResult = (zipFile != null);
-    ApiResult result = new ApiResult(zipFileResult, zipFile);
+    ApiResult result;
+    if (files == null) {
+      result = new ApiResult(false, "get files failed!");
+    } else {
+      File zipFile = this.getZipFile(files);
+      boolean zipFileResult = (zipFile != null);
+      URL url = new URL(req.getRequestURL().toString());
+      String downloadUrl;
+      String portString = "";
+      if (url.getPort() != 80) {
+        portString = ":" + url.getPort();
+      }
+      
+      downloadUrl = url.getProtocol() + "://" + url.getHost() + portString+ "//download//" + zipFile.getName();
+      result = new ApiResult(zipFileResult, downloadUrl);
+    }
     
     resp.setContentType("text/html; charset=UTF-8");
     resp.getWriter().println(new Gson().toJson(result));
@@ -65,7 +90,10 @@ public class CompressFiles extends HttpServlet {
       long startTimeMillis = 0;
       long endTimeMillis = 0;
 //      fileManager.searchDirFilesByModifiedTimeRange(dir, startTimeMillis, endTimeMillis, filesResult);
-      fileManager.getDirFilesByModifiedTimeRange(dir, startTimeMillis, endTimeMillis, filesResult);
+      
+      FileNameFilter fileNameFilter = new FileNameFilter(null, false);
+      
+      fileManager.getDirFilesByModifiedTimeRange(dir, fileNameFilter, startTimeMillis, endTimeMillis, filesResult);
 
       if (filesResult.size() <= 0) {
         System.out.println("there are no any files");
@@ -111,7 +139,7 @@ public class CompressFiles extends HttpServlet {
   }
   
   private File getZipFile(File[] files) {
-    String workingDir = System.getProperty("user.dir");
+    String downloadDir = this.httpServlet.getServletContext().getRealPath(File.separator + "download");
     File tempZipFile = null;
     
     try {
@@ -132,7 +160,8 @@ public class CompressFiles extends HttpServlet {
         this.fileManager.copyFile(fileTemp, tempFile);
       }
       
-      tempZipFile = new File(workingDir + File.separator + "tempZip.zip");
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+      tempZipFile = new File(downloadDir + File.separator + dateFormat.format(Calendar.getInstance().getTime()) + ".zip");
       if (tempZipFile.exists()) {
         tempZipFile.delete();
       }

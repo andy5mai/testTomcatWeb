@@ -1,17 +1,9 @@
 package com.andy.testweb.servlet;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
-
-import com.andy.file.FileManager;
-import com.andy.util.ZipUtil;
-import com.google.gson.Gson;
 
 public class Main extends HttpServlet {
 
@@ -39,9 +31,9 @@ public class Main extends HttpServlet {
     
     if (uris[1].equals("api") && uris.length >= 3) {
       if (uris[2].equals("fileslist")) {
-        new FilesList().doPost(req, resp);
+        new FilesList(this).doPost(req, resp);
       } else if (uris[2].equals("compressfiles")) {
-        new CompressFiles().doPost(req, resp);
+        new CompressFiles(this).doPost(req, resp);
       }
       
       return;

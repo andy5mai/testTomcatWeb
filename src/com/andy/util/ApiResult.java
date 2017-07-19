@@ -5,10 +5,9 @@ public class ApiResult {
   private boolean result = false;
   private Object  data = null;
   
-  public ApiResult(boolean result, Object data) {
+  public ApiResult(boolean result, Object... data) {
     this.result = result;
     this.data = data;
-    
   }
   
   public boolean getResult() {

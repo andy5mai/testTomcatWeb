@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.andy.util.FileNameFilter;
+
 public class FileManager {
 
   protected ArrayList<File> listDir = new ArrayList<File>();
@@ -42,9 +44,13 @@ public class FileManager {
     this.commonFile = null;
   }
   
-  public void getDirFilesByModifiedTimeRange(File fileDir, long startTime, long endTime, List<FileObj> filesResult) {
+  public void getDirFilesByModifiedTimeRange(File fileDir, FileNameFilter fileNameFilter, long startTime, long endTime, List<FileObj> filesResult) {
+    
+//    if (fileDir.isDirectory() && fileDir.getPath().contains("git")) {
+//      return;
+//    }
    
-    File[] files = fileDir.listFiles();
+    File[] files = fileDir.listFiles(fileNameFilter);
     
     if (fileDir.getParentFile() != null) {
       filesResult.add(new FileObj(fileDir.getParentFile(), true));
@@ -55,33 +61,50 @@ public class FileManager {
     }
 
     for (File file : files) {
-      if ((startTime == 0 && endTime == 0)
-          || (file.lastModified() >= startTime && file.lastModified() <= endTime)) {
-        filesResult.add(new FileObj(file));
-      }
+      filesResult.add(new FileObj(file));
     }
   }
 
-  public void searchDirFilesByModifiedTimeRange(File fileDir, long startTime, long endTime, List<File> filesResult) {
+  public void searchDirFilesByModifiedTimeRange(File fileDir, FileNameFilter fileNameFilter, long startTime, long endTime, List<FileObj> filesResult) {
 
-    if (fileDir.isDirectory() && fileDir.getPath().contains("git")) {
+    if (fileDir.isDirectory() && (fileDir.getName().contains("git") || fileDir.getName().startsWith("."))) {
       return;
     }
 
     File[] files = fileDir.listFiles();
-
+    
     if (files == null || files.length == 0) {
       return;
     }
 
     for (File file : files) {
       if (file.isDirectory()) {
-        this.searchDirFilesByModifiedTimeRange(file, startTime, endTime, filesResult);
+        this.searchDirFilesByModifiedTimeRange(file, fileNameFilter, startTime, endTime, filesResult);
       } else if ((startTime == 0 && endTime == 0)
-          || (file.lastModified() >= startTime && file.lastModified() <= endTime)) {
-        filesResult.add(file);
+          || (file.lastModified() >= startTime || file.lastModified() <= endTime)) {
+        
+        if (fileNameFilter.accept(file.getParentFile(), file.getName())) {
+          filesResult.add(new FileObj(file));
+        }
       }
     }
+  }
+  
+  public File[] setCommonFile(String[] filePaths, String commonDirPaths) {
+    File[] files = new File[filePaths.length];
+    String filePath;
+    
+    for (int i = 0; i < filePaths.length; i++) {
+      filePath = filePaths[i];
+      if (filePath.startsWith(commonDirPaths) == false) {
+        return null;
+      }
+      
+      files[i] = new File(filePath);
+    }
+    
+    this.commonFile = new File(commonDirPaths);
+    return files; 
   }
 
   public void setPathWeights(File file) {

@@ -5,6 +5,8 @@ import java.io.File;
 public class FileObj {
   
 //  protected transient File file;
+  public String name;
+  
   public String path;
   
   public boolean isDir;
@@ -14,6 +16,7 @@ public class FileObj {
   public FileObj(File file) {
 //    this.file = file;
     this.path = file.getPath();
+    this.name = file.getName();
     this.isDir = file.isDirectory();
   }
   

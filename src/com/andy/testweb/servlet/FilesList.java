@@ -3,7 +3,6 @@ package com.andy.testweb.servlet;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -12,10 +11,17 @@ import javax.servlet.http.*;
 import com.andy.file.FileManager;
 import com.andy.file.FileObj;
 import com.andy.util.ApiResult;
+import com.andy.util.FileNameFilter;
 import com.andy.util.ZipUtil;
 import com.google.gson.Gson;
 
-public class FilesList extends HttpServlet {
+public class FilesList extends BaseServlet {
+  
+  protected HttpServlet httpServlet;
+  
+  public FilesList(HttpServlet httpServlet) {
+    super(httpServlet);
+  }
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -29,6 +35,7 @@ public class FilesList extends HttpServlet {
     long endTimeMillis = 0;
     ApiResult result;
     String path = req.getParameter("path");
+    String fileName = req.getParameter("fileName");
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
     String modifiedStartDateStr = req.getParameter("modifiedStartDate");
     String modifiedEndDateStr = req.getParameter("modifiedEndDate");
@@ -42,7 +49,7 @@ public class FilesList extends HttpServlet {
         endTimeMillis = sdf.parse(modifiedEndDateStr).getTime();
       }
       
-      List<FileObj> filesList = getFileList(path, startTimeMillis, endTimeMillis);
+      List<FileObj> filesList = getFileList(path, fileName, startTimeMillis, endTimeMillis);
       
       boolean getFilesListResult = (filesList != null);
       result = new ApiResult(getFilesListResult, filesList);
@@ -61,7 +68,7 @@ public class FilesList extends HttpServlet {
     
   }
 
-  private List<FileObj> getFileList(String path, long startTimeMillis, long endTimeMillis) {
+  private List<FileObj> getFileList(String path, String fileName, long startTimeMillis, long endTimeMillis) {
     
     List<FileObj> filesResult = new ArrayList<FileObj>();
     try {
@@ -79,9 +86,15 @@ public class FilesList extends HttpServlet {
 
 //      long startTimeMillis = 0;
 //      long endTimeMillis = 0;
-//      fileManager.searchDirFilesByModifiedTimeRange(dir, startTimeMillis, endTimeMillis, filesResult);
-      fileManager.getDirFilesByModifiedTimeRange(dir, startTimeMillis, endTimeMillis, filesResult);
-
+      
+      FileNameFilter fileNameFilter = new FileNameFilter(fileName, false);
+      
+      if (startTimeMillis > 0 || endTimeMillis > 0) {
+        fileManager.searchDirFilesByModifiedTimeRange(dir, fileNameFilter, startTimeMillis, endTimeMillis, filesResult);
+      } else {
+        fileManager.getDirFilesByModifiedTimeRange(dir, fileNameFilter, startTimeMillis, endTimeMillis, filesResult);
+      }
+      
       if (filesResult.size() <= 0) {
         System.out.println("there are no any files");
         return filesResult;
@@ -111,39 +124,39 @@ public class FilesList extends HttpServlet {
     return filePaths;
   }
   
-  private File getZipFile(List<File> filesList) {
-    String workingDir = System.getProperty("user.dir");
-    File tempZipFile = null;
-    
-    try {
-    
-      FileManager fileManager = new FileManager();
-      String strTempFilePath = ".\\\\temp";
-      
-      File tempFile = new File(strTempFilePath);
-      
-      fileManager.deleteDirectory(tempFile);
-      tempFile.mkdir();
-      String commonFilePath = fileManager.getCommonFile().getPath().replaceAll("\\\\", "/");
-      for (File fileTemp : filesList) {
-  
-        tempFile = new File(fileTemp.getParent().replaceAll("\\\\", "/").replaceFirst(commonFilePath, strTempFilePath).replaceAll("/", "\\\\"));
-        tempFile.mkdirs();
-        tempFile = new File(tempFile.getPath() + File.separator + fileTemp.getName());
-        // // tempFile.createNewFile();
-        fileManager.copyFile(fileTemp, tempFile);
-      }
-      
-      tempZipFile = new File(workingDir + File.separator + "tempZip.zip");
-      if (tempZipFile.exists()) {
-        tempZipFile.delete();
-      }
-      
-      ZipUtil.makeZip(fileManager.getCommonFile(), tempZipFile);
-    } catch (Exception exc) {
-      exc.printStackTrace();
-    }
-    
-    return tempZipFile;
-  }
+//  private File getZipFile(List<File> filesList) {
+//    String workingDir = System.getProperty("user.dir");
+//    File tempZipFile = null;
+//    
+//    try {
+//    
+//      FileManager fileManager = new FileManager();
+//      String strTempFilePath = ".\\\\temp";
+//      
+//      File tempFile = new File(strTempFilePath);
+//      
+//      fileManager.deleteDirectory(tempFile);
+//      tempFile.mkdir();
+//      String commonFilePath = fileManager.getCommonFile().getPath().replaceAll("\\\\", "/");
+//      for (File fileTemp : filesList) {
+//  
+//        tempFile = new File(fileTemp.getParent().replaceAll("\\\\", "/").replaceFirst(commonFilePath, strTempFilePath).replaceAll("/", "\\\\"));
+//        tempFile.mkdirs();
+//        tempFile = new File(tempFile.getPath() + File.separator + fileTemp.getName());
+//        // // tempFile.createNewFile();
+//        fileManager.copyFile(fileTemp, tempFile);
+//      }
+//      
+//      tempZipFile = new File(workingDir + File.separator + "tempZip.zip");
+//      if (tempZipFile.exists()) {
+//        tempZipFile.delete();
+//      }
+//      
+//      ZipUtil.makeZip(fileManager.getCommonFile(), tempZipFile);
+//    } catch (Exception exc) {
+//      exc.printStackTrace();
+//    }
+//    
+//    return tempZipFile;
+//  }
 }
